@@ -1,4 +1,4 @@
-package com.surendramaran.yolov8tflite
+package com.surendramaran.yolov8objectdetection
 
 import android.content.Context
 import android.graphics.Canvas

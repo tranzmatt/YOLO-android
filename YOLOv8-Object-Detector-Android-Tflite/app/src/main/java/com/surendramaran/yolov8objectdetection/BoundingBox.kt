@@ -1,4 +1,4 @@
-package com.surendramaran.yolov8tflite
+package com.surendramaran.yolov8objectdetection
 
 data class BoundingBox(
     val x1: Float,
