@@ -37,7 +37,7 @@ class ImageClassification(
 
     init {
 
-        /* Using GPU cause problems with Recycler View
+        /* Using GPU may cause problems with Recycler View */
 
         val compatList = CompatibilityList()
             Interpreter.Options().apply{
@@ -48,7 +48,6 @@ class ImageClassification(
                     this.setNumThreads(4)
                 }
             }
-        */
 
         val options = Interpreter.Options().apply{
            this.setNumThreads(4)
