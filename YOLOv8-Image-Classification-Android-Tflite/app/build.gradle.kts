@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
+<<<<<<< HEAD
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.gpu)
     implementation(libs.tensorflow.lite.gpu.api)
@@ -68,5 +69,10 @@ dependencies {
     implementation(libs.tensorflow.lite.metadata)
     implementation(libs.tensorflow.lite.task.vision)
     implementation(libs.tensorflow.lite.gpu.delegate.plugin)
+=======
+    implementation("org.tensorflow:tensorflow-lite:2.16.1")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-metadata:0.4.4")
+>>>>>>> upstream/main
 
 }

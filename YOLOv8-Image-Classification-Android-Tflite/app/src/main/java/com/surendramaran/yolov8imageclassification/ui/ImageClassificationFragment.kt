@@ -4,11 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -18,11 +20,11 @@ import com.surendramaran.yolov8imageclassification.BuildConfig
 import com.surendramaran.yolov8imageclassification.Constants.LABELS_PATH
 import com.surendramaran.yolov8imageclassification.Constants.MODEL_PATH
 import com.surendramaran.yolov8imageclassification.ImageClassification
-import com.surendramaran.yolov8imageclassification.OrientationLiveData
-import com.surendramaran.yolov8imageclassification.PredicationAdapter
+import com.surendramaran.yolov8imageclassification.utils.OrientationLiveData
+import com.surendramaran.yolov8imageclassification.utils.PredicationAdapter
 import com.surendramaran.yolov8imageclassification.Prediction
 import com.surendramaran.yolov8imageclassification.R
-import com.surendramaran.yolov8imageclassification.Utils
+import com.surendramaran.yolov8imageclassification.utils.Utils
 import com.surendramaran.yolov8imageclassification.databinding.FragmentImageClassificationBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,13 +49,13 @@ class ImageClassificationFragment : Fragment(), ImageClassification.Classificati
         }
     }
 
-    private var currentPhotoFile: File? = null
+
+    private var currentPhotoUri: Uri? = null
     private val photoCapture = registerForActivityResult(ActivityResultContracts.TakePicture()) {
         if (it) {
-            currentPhotoFile?.let { file ->
-                val bitmap = Utils.fileToBitmap(file.absolutePath) ?: return@let
-                val rotation = orientationLiveData.value ?: 90
-                val rotated = Utils.rotatedBitmap(bitmap, rotation)
+            currentPhotoUri?.let { uri ->
+                val bitmap = Utils.getBitmapFromUri(requireContext(), uri) ?: return@let
+                val rotated = Utils.rotateImageIfRequired(requireContext(), bitmap, uri)
                 runClassification(rotated)
             }
         }
@@ -85,7 +87,9 @@ class ImageClassificationFragment : Fragment(), ImageClassification.Classificati
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
         backgroundExecutor.execute {
-            imageClassification = ImageClassification(requireContext(), MODEL_PATH, LABELS_PATH, this)
+            imageClassification = ImageClassification(requireContext(), MODEL_PATH, LABELS_PATH, this) {
+                toast(it)
+            }
         }
 
         orientationLiveData = OrientationLiveData(requireContext(), characteristics).apply {
@@ -107,7 +111,7 @@ class ImageClassificationFragment : Fragment(), ImageClassification.Classificati
                     "${BuildConfig.APPLICATION_ID}.provider",
                     photoFile
                 )
-                currentPhotoFile = photoFile
+                currentPhotoUri = photoUri
                 photoCapture.launch(photoUri)
             }
 
@@ -121,6 +125,12 @@ class ImageClassificationFragment : Fragment(), ImageClassification.Classificati
         binding.ivMain.setImageBitmap(bitmap)
         backgroundExecutor.submit {
             imageClassification?.invoke(bitmap)
+        }
+    }
+
+    private fun toast(message: String) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
         }
     }
 

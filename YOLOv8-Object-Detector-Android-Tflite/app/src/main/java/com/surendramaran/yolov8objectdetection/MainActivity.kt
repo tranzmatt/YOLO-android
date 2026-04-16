@@ -5,7 +5,9 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
@@ -16,9 +18,16 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+<<<<<<< HEAD:YOLOv8-Object-Detector-Android-Tflite/app/src/main/java/com/surendramaran/yolov8objectdetection/MainActivity.kt
 import com.surendramaran.yolov8objectdetection.Constants.LABELS_PATH
 import com.surendramaran.yolov8objectdetection.Constants.MODEL_PATH
 import com.surendramaran.yolov8objectdetection.databinding.ActivityMainBinding
+=======
+import com.surendramaran.yolov8tflite.Constants.LABELS_PATH
+import com.surendramaran.yolov8tflite.Constants.MODEL_PATH
+import yolov8tflite.R
+import yolov8tflite.databinding.ActivityMainBinding
+>>>>>>> upstream/main:YOLOv8-Object-Detector-Android-Tflite/app/src/main/java/com/surendramaran/yolov8tflite/MainActivity.kt
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -42,7 +51,9 @@ class MainActivity : AppCompatActivity(), Detector.DetectorListener {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         cameraExecutor.execute {
-            detector = Detector(baseContext, MODEL_PATH, LABELS_PATH, this)
+            detector = Detector(baseContext, MODEL_PATH, LABELS_PATH, this) {
+                toast(it)
+            }
         }
 
         if (allPermissionsGranted()) {
@@ -140,7 +151,7 @@ class MainActivity : AppCompatActivity(), Detector.DetectorListener {
                 imageAnalyzer
             )
 
-            preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+            preview?.surfaceProvider = binding.viewFinder.surfaceProvider
         } catch(exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
@@ -153,6 +164,12 @@ class MainActivity : AppCompatActivity(), Detector.DetectorListener {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) {
         if (it[Manifest.permission.CAMERA] == true) { startCamera() }
+    }
+
+    private fun toast(message: String) {
+        runOnUiThread {
+            Toast.makeText(baseContext, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onDestroy() {
